@@ -1,23 +1,83 @@
-// contacts.js
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 
-/*
- * Раскомментируй и запиши значение
- * const contactsPath = ;
- */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// TODO: задокументировать каждую функцию
-function listContacts() {
-  // ...твой код
+const contactsPath = path.join(__dirname, './db/contacts.json');
+
+export async function listContacts() {
+  try {
+    const data = await fs.readFile(contactsPath);
+    const contactsList = JSON.parse(data);
+
+    console.table(contactsList);
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function getContactById(contactId) {
-  // ...твой код
+export async function getContactById(contactId) {
+  try {
+    const data = await fs.readFile(contactsPath);
+    const contactsList = JSON.parse(data);
+
+    const contact = contactsList.find(
+      contact => contact.id === Number(contactId),
+    );
+    console.log(contact, contactId);
+
+    if (!contact) {
+      return console.error(`Сontact with id=${contactId} not found`);
+    }
+    console.table(contact);
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function removeContact(contactId) {
-  // ...твой код
+export async function removeContact(contactId) {
+  try {
+    const data = await fs.readFile(contactsPath);
+    const contactsList = JSON.parse(data);
+    const newContactList = contactsList.filter(
+      contact => contact.id !== Number(contactId),
+    );
+
+    if (newContactList.length === contactsList.length) {
+      return console.log(`Сontact with id=${contactId} not found`);
+    }
+
+    await fs.writeFile(contactsPath, JSON.stringify(newContactList));
+    console.log(`Сontact with id=${contactId} removed`);
+
+    listContacts();
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function addContact(name, email, phone) {
-  // ...твой код
+export async function addContact(name, email, phone) {
+  try {
+    const data = await fs.readFile(contactsPath);
+    const contactsList = JSON.parse(data);
+
+    const contactInList = contactsList.find(
+      contact => contact.email === email || contact.phone === phone,
+    );
+    if (contactInList) {
+      return console.log('Contact already in the list');
+    }
+    const newContact = { id: uuidv4(), name, email, phone };
+    const newContactsList = JSON.stringify([...contactsList, newContact]);
+
+    await fs.writeFile(contactsPath, newContactsList);
+    console.log(`Contact ${name} added to the list`);
+
+    listContacts();
+  } catch (error) {
+    console.log(error.message);
+  }
 }
