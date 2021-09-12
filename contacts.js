@@ -1,14 +1,11 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { v4 as uuidv4 } from 'uuid';
+const fs = require ( "fs/promises");
+const path = require ("path");
+const { v4 } = require ("uuid");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const contactsPath = path.join(__dirname, "./db/contacts.json");
+console.log(contactsPath);
 
-const contactsPath = path.join(__dirname, './db/contacts.json');
-
-export async function listContacts() {
+ async function listContacts() {
   try {
     const data = await fs.readFile(contactsPath);
     const contactsList = JSON.parse(data);
@@ -19,7 +16,7 @@ export async function listContacts() {
   }
 }
 
-export async function getContactById(contactId) {
+ async function getContactById(contactId) {
   try {
     const data = await fs.readFile(contactsPath);
     const contactsList = JSON.parse(data);
@@ -38,16 +35,16 @@ export async function getContactById(contactId) {
   }
 }
 
-export async function removeContact(contactId) {
+ async function removeContact(contactId) {
   try {
     const data = await fs.readFile(contactsPath);
     const contactsList = JSON.parse(data);
     const newContactList = contactsList.filter(
-      contact => contact.id !== Number(contactId),
+      contact => contact.id !== (contactId),
     );
 
     if (newContactList.length === contactsList.length) {
-      return console.log(`Сontact with id=${contactId} not found`);
+      return console.log(`Сontact with id= ${contactId} not found`);
     }
 
     await fs.writeFile(contactsPath, JSON.stringify(newContactList));
@@ -59,7 +56,7 @@ export async function removeContact(contactId) {
   }
 }
 
-export async function addContact(name, email, phone) {
+ async function addContact(name, email, phone) {
   try {
     const data = await fs.readFile(contactsPath);
     const contactsList = JSON.parse(data);
@@ -70,7 +67,7 @@ export async function addContact(name, email, phone) {
     if (contactInList) {
       return console.log('Contact already in the list');
     }
-    const newContact = { id: uuidv4(), name, email, phone };
+    const newContact = { id: v4(), name, email, phone };
     const newContactsList = JSON.stringify([...contactsList, newContact]);
 
     await fs.writeFile(contactsPath, newContactsList);
@@ -81,3 +78,5 @@ export async function addContact(name, email, phone) {
     console.log(error.message);
   }
 }
+
+module.exports = {listContacts,getContactById,removeContact,addContact}
