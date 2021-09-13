@@ -1,33 +1,35 @@
-const fs = require ( "fs/promises");
-const path = require ("path");
-const { v4 } = require ("uuid");
+const fs = require('fs/promises');
+const path = require('path');
+const { v4 } = require('uuid');
 
-const contactsPath = path.join(__dirname, "./db/contacts.json");
+const contactsPath = path.join(__dirname, './db/contacts.json');
 console.log(contactsPath);
 
- async function listContacts() {
-  try {
-    const data = await fs.readFile(contactsPath);
-    const contactsList = JSON.parse(data);
+async function readContacts() {
+  const data = await fs.readFile(contactsPath);
+  const contactsList = JSON.parse(data);
+  return contactsList;
+}
 
+async function listContacts() {
+  try {
+    const contactsList = await readContacts();
     console.table(contactsList);
+    return contactsList;
   } catch (error) {
     console.log(error.message);
   }
 }
 
- async function getContactById(contactId) {
+async function getContactById(contactId) {
   try {
-    const data = await fs.readFile(contactsPath);
-    const contactsList = JSON.parse(data);
-
+    const contactsList = await readContacts();
     const contact = contactsList.find(
-      contact => contact.id === Number(contactId),
+      contact => Number(contact.id) === Number(contactId),
     );
-    console.log(contact, contactId);
 
     if (!contact) {
-      return console.error(`Сontact with id=${contactId} not found`);
+      return console.error(`Сontact with id = ${contactId} not found`);
     }
     console.table(contact);
   } catch (error) {
@@ -35,12 +37,11 @@ console.log(contactsPath);
   }
 }
 
- async function removeContact(contactId) {
+async function removeContact(contactId) {
   try {
-    const data = await fs.readFile(contactsPath);
-    const contactsList = JSON.parse(data);
+    const contactsList = await readContacts();
     const newContactList = contactsList.filter(
-      contact => contact.id !== (contactId),
+      contact => Number(contact.id) !== Number(contactId),
     );
 
     if (newContactList.length === contactsList.length) {
@@ -56,11 +57,9 @@ console.log(contactsPath);
   }
 }
 
- async function addContact(name, email, phone) {
+async function addContact(name, email, phone) {
   try {
-    const data = await fs.readFile(contactsPath);
-    const contactsList = JSON.parse(data);
-
+    const contactsList = await readContacts();
     const contactInList = contactsList.find(
       contact => contact.email === email || contact.phone === phone,
     );
@@ -79,4 +78,4 @@ console.log(contactsPath);
   }
 }
 
-module.exports = {listContacts,getContactById,removeContact,addContact}
+module.exports = { listContacts, getContactById, removeContact, addContact };
