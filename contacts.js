@@ -21,13 +21,22 @@ async function listContacts() {
   }
 }
 
+async function updateContacts(data, message) {
+  try {
+    await fs.writeFile(contactsPath, JSON.stringify(data));
+    console.log(message);
+  } catch (error) {
+    throw error;
+  }
+}
+
 async function getContactById(contactId) {
   try {
     const contactsList = await readContacts();
     const contact = contactsList.find(
-      contact => Number(contact.id) === Number(contactId),
+      contact => String(contact.id) === String(contactId),
     );
-
+    console.log(typeof String(contactId));
     if (!contact) {
       return console.error(`Сontact with id = ${contactId} not found`);
     }
@@ -40,17 +49,25 @@ async function getContactById(contactId) {
 async function removeContact(contactId) {
   try {
     const contactsList = await readContacts();
-    const newContactList = contactsList.filter(
-      contact => Number(contact.id) !== Number(contactId),
+    const idx = contactsList.findIndex(
+      contact => String(contact.id) === String(contactId),
     );
-
-    if (newContactList.length === contactsList.length) {
-      return console.log(`Сontact with id= ${contactId} not found`);
+    if (idx === -1) {
+      console.log(`Сontact with id= ${contactId} not found`);
+      return null;
     }
+    contactsList.splice(idx, 1);
 
-    await fs.writeFile(contactsPath, JSON.stringify(newContactList));
-    console.log(`Сontact with id=${contactId} removed`);
+    //второй вариант удаления
+    // const newContactList = contactsList.filter(
+    //    => Number(contact.id) !== Number(contactId),
+    // );
+    // if (newContactList.length === contactsList.length) {
+    //   return console.log(`Сontact with id= ${contactId} not found`);
+    // }
+    // await fs.writeFile(contactsPath, JSON.stringify(newContactList));
 
+    await updateContacts(contactsList, `Сontact with id=${contactId} removed`);
     listContacts();
   } catch (error) {
     console.log(error.message);
@@ -60,18 +77,10 @@ async function removeContact(contactId) {
 async function addContact(name, email, phone) {
   try {
     const contactsList = await readContacts();
-    const contactInList = contactsList.find(
-      contact => contact.email === email || contact.phone === phone,
-    );
-    if (contactInList) {
-      return console.log('Contact already in the list');
-    }
     const newContact = { id: v4(), name, email, phone };
-    const newContactsList = JSON.stringify([...contactsList, newContact]);
+    const newContactsList = [...contactsList, newContact];
 
-    await fs.writeFile(contactsPath, newContactsList);
-    console.log(`Contact ${name} added to the list`);
-
+    await updateContacts(newContactsList, `Contact ${name} added to the list`);
     listContacts();
   } catch (error) {
     console.log(error.message);
