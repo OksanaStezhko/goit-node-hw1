@@ -58,15 +58,6 @@ async function removeContact(contactId) {
     }
     contactsList.splice(idx, 1);
 
-    //второй вариант удаления
-    // const newContactList = contactsList.filter(
-    //    => Number(contact.id) !== Number(contactId),
-    // );
-    // if (newContactList.length === contactsList.length) {
-    //   return console.log(`Сontact with id= ${contactId} not found`);
-    // }
-    // await fs.writeFile(contactsPath, JSON.stringify(newContactList));
-
     await updateContacts(contactsList, `Сontact with id=${contactId} removed`);
     listContacts();
   } catch (error) {
