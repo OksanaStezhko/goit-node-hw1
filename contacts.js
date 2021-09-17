@@ -15,7 +15,6 @@ async function listContacts() {
   try {
     const contactsList = await readContacts();
     console.table(contactsList);
-    return contactsList;
   } catch (error) {
     console.log(error.message);
   }
@@ -36,7 +35,6 @@ async function getContactById(contactId) {
     const contact = contactsList.find(
       contact => String(contact.id) === String(contactId),
     );
-    console.log(typeof String(contactId));
     if (!contact) {
       return console.error(`Сontact with id = ${contactId} not found`);
     }
